@@ -7,8 +7,9 @@ import (
 )
 
 var decryptCmd = &cobra.Command{
-	Use:  "decrypt [encrypted file path]",
-	Args: cobra.ExactArgs(1),
+	Use:   "decrypt [encrypted file path]",
+	Short: "Decrypt a backup file",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		outputFile, err := cmd.Flags().GetString("output")
 		if err != nil {

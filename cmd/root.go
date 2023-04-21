@@ -4,7 +4,7 @@ import "github.com/spf13/cobra"
 
 var rootCmd = &cobra.Command{
 	Use:   "backup",
-	Short: "backup is a tool to encrypt and backup your files",
+	Short: "Backup is a tool to encrypt and backup your files",
 }
 
 func init() {

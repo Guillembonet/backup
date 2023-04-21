@@ -8,7 +8,7 @@ import (
 
 var restoreCmd = &cobra.Command{
 	Use:   "restore [encrypted file path]",
-	Short: "restore a backup",
+	Short: "Restore a backup",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		outputDir, err := cmd.Flags().GetString("output")

@@ -12,7 +12,7 @@ import (
 
 var encryptCmd = &cobra.Command{
 	Use:   "encrypt",
-	Short: "encrypt your files",
+	Short: "Encrypt your files",
 	Run: func(cmd *cobra.Command, args []string) {
 		configPath, err := cmd.Flags().GetString("config-path")
 		if err != nil {

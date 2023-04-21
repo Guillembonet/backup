@@ -16,7 +16,7 @@ import (
 
 var backupCmd = &cobra.Command{
 	Use:   "backup",
-	Short: "encrypt and backup your files",
+	Short: "Encrypt and backup your files",
 	Run: func(cmd *cobra.Command, args []string) {
 		configPath, err := cmd.Flags().GetString("config-path")
 		if err != nil {
