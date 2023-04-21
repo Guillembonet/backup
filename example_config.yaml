@@ -1,0 +1,19 @@
+runtime:
+  log_level: debug
+
+run_mode:
+  run_once_and_exit: true
+  interval: 10s
+
+backup:
+  encryption_password: test_password
+  sources:
+    - type: folder
+      path: .
+  targets:
+    - type: mega
+      backup_expiration_days: 2
+      config:
+        username: <username>
+        password: <password>
+        backup_folder: backups
