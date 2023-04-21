@@ -1,4 +1,4 @@
-package commands
+package cmd
 
 import "github.com/spf13/cobra"
 
@@ -10,6 +10,8 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(decryptCmd)
 	rootCmd.AddCommand(restoreCmd)
+	rootCmd.AddCommand(encryptCmd)
+	rootCmd.AddCommand(backupCmd)
 }
 
 func Execute() error {

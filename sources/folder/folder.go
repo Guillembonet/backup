@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/guillembonet/backup/sources"
 )
@@ -14,7 +15,7 @@ type Source struct {
 
 func NewSource(source string) (*Source, error) {
 	return &Source{
-		source: source,
+		source: strings.TrimSuffix(source, "/"),
 	}, nil
 }
 

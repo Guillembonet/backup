@@ -1,15 +1,12 @@
 package config
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"time"
 
 	"gopkg.in/yaml.v2"
 )
-
-var flagConfigPath = flag.String("configPath", "./example_config.yaml", "Path to config file")
 
 type Config struct {
 	Runtime Runtime `yaml:"runtime"`
@@ -43,10 +40,8 @@ type Target struct {
 	Config               map[string]string `yaml:"config"`
 }
 
-func LoadConfig() (*Config, error) {
-	flag.Parsed()
-
-	data, err := os.ReadFile(*flagConfigPath)
+func LoadConfig(configPath string) (*Config, error) {
+	data, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}

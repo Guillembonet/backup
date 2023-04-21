@@ -68,6 +68,33 @@ func (b *Backup) Run() error {
 	if err != nil {
 		return fmt.Errorf("failed to create backup destination: %w", err)
 	}
+
+	encryptedFileName := fmt.Sprintf("backup_%s.bin", time.Now().Format("2006-01-02_15-04-05"))
+	encryptedFileDest := filepath.Join(backupDest, encryptedFileName)
+	err = b.Encrypt(encryptedFileDest)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt backup: %w", err)
+	}
+
+	for i, target := range b.targets {
+		err := target.Upload(encryptedFileDest)
+		if err != nil {
+			return fmt.Errorf("failed to upload backup: %w", err)
+		}
+		err = target.Clean(b.cfg.Targets[i].BackupExpirationDays)
+		if err != nil {
+			return fmt.Errorf("failed to clean old backups in target: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (b *Backup) Encrypt(encryptedFilePath string) error {
+	backupDest, err := os.MkdirTemp("", "backup")
+	if err != nil {
+		return fmt.Errorf("failed to create backup destination: %w", err)
+	}
 	for _, source := range b.sources {
 		err := source.Backup(backupDest)
 		if err != nil {
@@ -90,31 +117,11 @@ func (b *Backup) Run() error {
 	}
 	log.Debug().Msg("deleted uncompressed backup")
 
-	encryptedFileName := fmt.Sprintf("backup_%s.bin", time.Now().Format("2006-01-02_15-04-05"))
-	encryptedFileDest := filepath.Join(backupDest, encryptedFileName)
-	err = encrypt(compressedBackupDest, encryptedFileDest, b.cfg.EncryptionPassword)
+	err = encrypt(compressedBackupDest, encryptedFilePath, b.cfg.EncryptionPassword)
 	if err != nil {
 		return fmt.Errorf("failed to encrypt backup: %w", err)
 	}
-	log.Debug().Str("destination", encryptedFileDest).Msg("encrypted backup")
-
-	err = delete(backupDest, encryptedFileName)
-	if err != nil {
-		return fmt.Errorf("failed to delete unencrypted backup: %w", err)
-	}
-	log.Debug().Msg("deleted unencrypted backup")
-
-	for i, target := range b.targets {
-		err := target.Upload(encryptedFileDest)
-		if err != nil {
-			return fmt.Errorf("failed to upload backup: %w", err)
-		}
-		err = target.Clean(b.cfg.Targets[i].BackupExpirationDays)
-		if err != nil {
-			return fmt.Errorf("failed to clean old backups in target: %w", err)
-		}
-	}
-
+	log.Debug().Str("destination", encryptedFilePath).Msg("encrypted backup")
 	return nil
 }
 
