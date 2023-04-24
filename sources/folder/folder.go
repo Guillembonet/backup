@@ -1,12 +1,11 @@
 package folder
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/guillembonet/backup/sources"
 )
 
 type Source struct {
@@ -24,42 +23,64 @@ func (s *Source) Backup(destination string) error {
 	sourceBase := filepath.Base(s.source)
 	// create the destination directory if it does not exist
 	destination = filepath.Join(destination, sourceBase)
-	err := os.MkdirAll(destination, 0755)
+	err := recursiveCopy(s.source, destination)
+	if err != nil {
+		return fmt.Errorf("failed to copy files: %w", err)
+	}
+
+	return nil
+}
+
+func recursiveCopy(source string, destination string) error {
+	// create the destination directory if it does not exist
+	err := os.MkdirAll(destination, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
 	// get a list of files in the source directory
-	files, err := filepath.Glob(filepath.Join(s.source, "*"))
+	files, err := filepath.Glob(filepath.Join(source, "*"))
 	if err != nil {
 		return err
 	}
 
-	if len(files) == 0 {
-		return sources.ErrNothingToBackup
-	}
-
-	// copy each file to the destination directory
+	// copy each file in the source directory to the destination directory
 	for _, file := range files {
-		// create a new file in the destination directory with the same name as the source file
-		dest := filepath.Join(destination, filepath.Base(file))
-		src, err := os.Open(file)
-		if err != nil {
-			return err
-		}
-		defer src.Close()
+		if isDir(file) {
+			// recursively copy the directory
+			dirName := filepath.Base(file)
+			err = recursiveCopy(file, filepath.Join(destination, dirName))
+			if err != nil {
+				return err
+			}
+		} else {
+			// copy the file
+			dest := filepath.Join(destination, filepath.Base(file))
+			src, err := os.Open(file)
+			if err != nil {
+				return err
+			}
+			defer src.Close()
 
-		// copy the contents of the source file to the destination file
-		dst, err := os.Create(dest)
-		if err != nil {
-			return err
-		}
-		defer dst.Close()
+			dst, err := os.Create(dest)
+			if err != nil {
+				return err
+			}
+			defer dst.Close()
 
-		_, err = io.Copy(dst, src)
-		if err != nil {
-			return err
+			_, err = io.Copy(dst, src)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
+}
+
+func isDir(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return info.IsDir()
 }
