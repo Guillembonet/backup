@@ -1,5 +1,5 @@
 # Build the service to a binary
-FROM golang:1.20.3-alpine AS builder
+FROM golang:1.20.3-alpine3.17 AS builder
 
 # Install packages
 RUN apk add --no-cache bash gcc musl-dev linux-headers git
